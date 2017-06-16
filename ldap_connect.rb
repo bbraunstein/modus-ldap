@@ -56,6 +56,10 @@ end
 
 # NOTE: username.split(',') automatically converts class String
 #       to class Array, even if its just one value.
+# TODO:
+#   * Add testing statements if user exists/is valid
+#   * Integrate options[:filter]
+#     - pass/fail if user is part of a group
 options[:username].each do |user|
   filter = Net::LDAP::Filter.eq("cn", user)
   ldap.search( :base => Treebase, :filter => filter, :attributes => options[:attrs]) do |entry|
