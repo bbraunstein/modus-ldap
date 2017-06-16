@@ -49,9 +49,7 @@ ldap = Net::LDAP.new :host => Host,
 if options[:username].is_a?(Array)
   options[:username].each do |u|
     filter = Net::LDAP::Filter.eq("cn", u)
-    treebase = "dc=modusagency,dc=com"
-
-    ldap.search( :base => treebase, :filter => filter ) do |entry|
+    ldap.search( :base => Treebase, :filter => filter ) do |entry|
       puts "DN: #{entry.dn}"
       entry.each do |attribute, values|
         print "#{attribute}: "
@@ -65,9 +63,7 @@ if options[:username].is_a?(Array)
   end
 else
   filter = Net::LDAP::Filter.eq("cn", options[:username])
-  treebase = "dc=modusagency,dc=com"
-
-  ldap.search( :base => treebase, :filter => filter ) do |entry|
+  ldap.search( :base => Treebase, :filter => filter ) do |entry|
     puts "#{entry.dn}"
     entry.each do |attribute, values|
       print "#{attribute}: "
