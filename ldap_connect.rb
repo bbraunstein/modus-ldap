@@ -1,6 +1,30 @@
 require 'rubygems'
 require 'net/ldap'
+require 'optparse'
 require_relative "secrets"
+
+options = { :username => nil, :filter => nil }
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ldap_connect.rb [options]"
+  opts.on('-u', '--username <username>,..', 'Accepts single username or comma-separated list.') do |username|
+    options[:username] = username.split(',')
+  end
+  opts.on('-f', '--filter <filter>', 'Specify a filter to constrain LDAP searches.') do |filter|
+    options[:filter] = filter
+  end
+  opts.on('-h', '--help', 'Displays this help and exit.') do
+    puts opts
+    exit
+  end
+end
+
+parser.parse!
+
+if options[:username] == nil
+  puts "Error: no username specified."
+  exit
+end
 
 # {{{ global defs
 def print_dotted_line
@@ -14,9 +38,6 @@ def print_dotted_line
 end
 #}}}
 
-
-@user = [ "bbraunstein", "bbondarenko", "bfrost" ]
-
 ldap = Net::LDAP.new :host => Host,
     :port => 389,
     :auth => {
@@ -25,8 +46,8 @@ ldap = Net::LDAP.new :host => Host,
       :password => Password
     }
 
-if @user.is_a?(Array)
-  @user.each do |u|
+if options[:username].is_a?(Array)
+  options[:username].each do |u|
     filter = Net::LDAP::Filter.eq("cn", u)
     treebase = "dc=modusagency,dc=com"
 
@@ -43,13 +64,13 @@ if @user.is_a?(Array)
     print_dotted_line
   end
 else
-  filter = Net::LDAP::Filter.eq("cn", @user)
+  filter = Net::LDAP::Filter.eq("cn", options[:username])
   treebase = "dc=modusagency,dc=com"
 
   ldap.search( :base => treebase, :filter => filter ) do |entry|
     puts "#{entry.dn}"
     entry.each do |attribute, values|
-      puts "#{attribute}: "
+      print "#{attribute}: "
       values.each do |value|
         puts "#{value}"
       end
